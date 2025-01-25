@@ -58,23 +58,34 @@ func getMovies(w http.ResponseWriter, r *http.Request) {
 func deleteMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	for index, item := range movies {
-		if item.ID == params["id"] {
-			movies = append(movies[:index], movies[index+1:]...)
-			break
-		}
+	_, err := db.Exec("DELETE FROM movies WHERE id = ?", params["id"])
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
 	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func getMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
 	params := mux.Vars(r)
-	for _, item := range movies {
-		if item.ID == params["id"] {
-			json.NewEncoder(w).Encode(item)
+	var movie Movie
+	var director Director
+
+	err := db.QueryRow("SELECT id, isbn, title, director_firstname, director_lastname FROM movies WHERE id = ?", params["id"]).Scan(&movie.ID, &movie.Isbn, &movie.Title, &movie.Director.Firstname, &movie.Director.Lastname)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "movie not found", http.StatusNotFound)
 			return
 		}
+		log.Println(err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
 	}
+
+	movie.Director = &director
 	json.NewEncoder(w).Encode(movies)
 }
 
