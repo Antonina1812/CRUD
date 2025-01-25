@@ -1,8 +1,8 @@
 package main
 
 import (
-	"GO_MOD/db"
-	_ "database/sql"
+	_ "GO_MOD/db"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+var db sql.DB
 
 type Movie struct {
 	ID       string    `json:"id"`
@@ -44,7 +46,7 @@ func getMovies(w http.ResponseWriter, r *http.Request) {
 		var director Director
 		if err := rows.Scan(&movie.ID, &movie.Isbn, &movie.Title, &movie.Director.Firstname, &movie.Director.Lastname); err != nil {
 			log.Println(err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 		movie.Director = &director
@@ -103,6 +105,7 @@ func updateMovie(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
+	//data.init()
 
 	movies = append(movies, Movie{ID: "1", Isbn: "438227", Title: "Movie One", Director: &Director{Firstname: "John", Lastname: "Doe"}})
 	movies = append(movies, Movie{ID: "2", Isbn: "45455", Title: "Movie Two", Director: &Director{Firstname: "Steve", Lastname: "Smith"}})
