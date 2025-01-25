@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -23,6 +24,7 @@ type Director struct {
 	Lastname  string `json:"lastname"`
 }
 
+var db *sql.DB
 var movies []Movie
 
 func getMovies(w http.ResponseWriter, r *http.Request) {
@@ -94,4 +96,4 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8000", r))
 }
 
-//http://localhost:8000/movies/1
+//http://localhost:8000/movies
